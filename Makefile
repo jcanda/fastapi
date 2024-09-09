@@ -58,12 +58,12 @@ pre-commit: ## Run pre-commit
 dump: ## Dump
 	mkdir -p backups
 	rm -fr backups/*
-	mysqldump -h 127.0.0.1 -u mysqldbu -d mysqldb backups/fastapi.sql
+	mysqldump -h 127.0.0.1 -u mysqldbu -pmysqlpass mysqldb > backups/fastapi.sql
 
 restore: ## Restore
 	U_ID=${UID} docker-compose stop web
-	U_ID=${UID} docker-compose exec db mysql -u mysqldbu -d mysqldb tools/init.sql
-	U_ID=${UID} docker-compose exec db mysql -u mysqldbu -d mysqldb backups/fastapi.sql
+	U_ID=${UID} docker-compose exec db mysql -u mysqldbu -pmysqlpass mysqldb < tools/init.sql
+	U_ID=${UID} docker-compose exec db mysql -u mysqldbu -pmysqlpass mysqldb < backups/fastapi.sql
 	U_ID=${UID} docker-compose up -d
 
 .PHONY: help Makefile
