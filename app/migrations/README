@@ -1,0 +1,28 @@
+Generic single-database configuration.
+
+### Check current version
+alembic current
+
+### Make new revision
+alembic revision --autogenerate -m "Initial migration"
+
+## Upgrade the DB to the newest revision
+alembic upgrade head
+
+### Downgrade DB to previus revision
+alembic downgrade -1
+
+### Downgrade DB to base
+alembic downgrade base
+
+### Downgrade DB to specific revision
+alembic downgrade 3f0c5e5a8c9e
+
+### Show history
+alembic history
+
+### Show history in verbose mode
+alembic history --verbose
+
+### Etiqueta la base de datos con el nombre de la revisión actual (head)
+alembic stamp head
