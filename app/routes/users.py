@@ -6,7 +6,7 @@ import bcrypt
 from core.security import get_current_user
 from databases import Database
 from db.session import get_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from models.users import users
 from schemas.users import UserCreate, UserInDB, UserUpdate
 from sqlalchemy.sql import asc, delete, insert, select, update
@@ -40,7 +40,9 @@ async def list_users(
 @router.get(
     "/users/admin",
     response_model=List[UserInDB],
-    responses={**responses},
+    responses={
+        204: {"description": "No se encontraron usuarios"}
+    },
 )
 async def list_users_admin(
     db: Database = Depends(get_db), current_user: dict = Depends(get_current_user)
@@ -51,12 +53,12 @@ async def list_users_admin(
 
     query = (
         select(users)
-        .where(users.c.is_staff == True)  # noqa
+        .where(users.c.is_staff.is_(True))
         .order_by(asc(users.c.id))
     )
     results = await db.fetch_all(query)
     if not results:
-        raise HTTPException(status_code=404, detail="No se encontraron usuarios")
+        Response(status_code=204)
     return results
 
 
@@ -64,7 +66,9 @@ async def list_users_admin(
 @router.get(
     "/users/clients",
     response_model=List[UserInDB],
-    responses={**responses},
+    responses={
+        204: {"description": "No se encontraron usuarios"}
+    },
 )
 async def list_users_clients(
     db: Database = Depends(get_db), current_user: dict = Depends(get_current_user)
@@ -75,12 +79,13 @@ async def list_users_clients(
 
     query = (
         select(users)
-        .where(users.c.is_staff == False)  # noqa
+        .where(users.c.is_staff.is_(False))
         .order_by(asc(users.c.id))
     )
     results = await db.fetch_all(query)
     if not results:
-        raise HTTPException(status_code=404, detail="No se encontraron usuarios")
+        return Response(status_code=204)
+    
     return results
 
 
