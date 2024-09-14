@@ -4,8 +4,7 @@ from typing import List
 
 import bcrypt
 from core.security import get_current_user
-from databases import Database
-from db.session import get_db
+from db.session import database as db
 from fastapi import APIRouter, Depends, HTTPException, Response
 from models.users import users
 from schemas.users import UserCreate, UserInDB, UserUpdate
@@ -23,7 +22,7 @@ responses = {404: {"description": "Not found"}}
     responses={**responses},
 )
 async def list_users(
-    db: Database = Depends(get_db), current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede crear usuarios
     if not current_user.get("is_staff"):
@@ -45,7 +44,7 @@ async def list_users(
     },
 )
 async def list_users_admin(
-    db: Database = Depends(get_db), current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede ver usuarios
     if not current_user.get("is_staff"):
@@ -71,7 +70,7 @@ async def list_users_admin(
     },
 )
 async def list_users_clients(
-    db: Database = Depends(get_db), current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede ver usuarios
     if not current_user.get("is_staff"):
@@ -97,7 +96,6 @@ async def list_users_clients(
 )
 async def create_user(
     user: UserCreate,
-    db: Database = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede crear usuarios
@@ -140,7 +138,6 @@ async def create_user(
 @router.get("/users/{user_id}", response_model=UserInDB, responses={404: {}})
 async def read_user(
     user_id: int,
-    db: Database = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede crear usuarios
@@ -159,7 +156,6 @@ async def read_user(
 async def update_user(
     user_id: int,
     user: UserUpdate,
-    db: Database = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede crear usuarios
@@ -236,7 +232,6 @@ async def update_user(
         })
 async def delete_user(
     user_id: int,
-    db: Database = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     # solo si el usuario logueado actual (get_current_user) es staff puede crear usuarios
