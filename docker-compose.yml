@@ -1,6 +1,7 @@
 
 services:
   fastapi:
+    container_name: fast-api-web-1
     build: .
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--reload"]
     volumes:
@@ -16,8 +17,8 @@ services:
       - MARIADB_USER=mysqldbu
       - MARIADB_PASSWORD=mysqlpass
       - MARIADB_HOST=db
-    #depends_on:
-    #  - db
+    depends_on:
+      - db
 
   db:
     image: mariadb
