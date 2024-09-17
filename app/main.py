@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import (
     auth,
     users,
+    logs,
 )
 
 @asynccontextmanager
@@ -34,3 +35,5 @@ async def version():
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="", tags=["Users"])
+app.include_router(logs.router, prefix="", tags=["Logs"], dependencies=[Depends(get_current_user)])
+

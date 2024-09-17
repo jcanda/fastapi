@@ -5,11 +5,12 @@ from typing import Annotated
 import bcrypt
 import core.security as jwt_utils
 from core.config import settings
-from databases import Database
-from db.session import get_db
+from core.utils import get_client_ip
+from db.session import database as db
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from models.users import users
+from models.logs import logs
 from schemas.auths import Token
 
 router = APIRouter()
@@ -36,7 +37,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 )
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Database = Depends(get_db),
+    client_ip: str = Depends(get_client_ip)
 ):
     query = users.select().where(users.c.username == form_data.username)
     user_record = await db.fetch_one(query)
@@ -51,12 +52,18 @@ async def login(
     access_token = jwt_utils.create_access_token(
         data={"sub": form_data.username, "id": user["id"], "is_staff": user["is_staff"]}
     )
-    # is token is generate correctly update last_login
+    # is token is generate correctly update last_login and add log record
     if access_token is not None:
         query = (
             users.update()
             .where(users.c.id == user["id"])
             .values(last_login=datetime.now(settings.spain_tz))
+        )
+        await db.execute(query)
+        # añado registro al log
+        query = (
+            logs.insert()
+            .values(user_id=user["id"], action="login", ip=client_ip, created_at=datetime.now(settings.spain_tz))
         )
         await db.execute(query)
 
